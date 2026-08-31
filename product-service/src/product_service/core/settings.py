@@ -4,6 +4,5 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
     db_src: str
-    test_db_src: str
 
 settings = Settings()
