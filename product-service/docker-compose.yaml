@@ -6,16 +6,16 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_SRC=postgresql+asyncpg://postgres:123@db:5432/products_service
+      - DB_SRC=postgresql+asyncpg://${POSTGRES_USER}:{POSTGRES_PASSWORD}@db:5432/${DB_NAME}
     depends_on:
       - db
 
   db:
     image: postgres:17
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123
-      POSTGRES_DB: products_service
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-products_service}
     volumes:
       - db_data:/var/lib/postgresql/data
   

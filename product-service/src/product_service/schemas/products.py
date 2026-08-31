@@ -7,6 +7,7 @@ from decimal import Decimal
 #post
 class ProductCreate(BaseModel):
     name: str
+    description: str | None = None
     price: Decimal
     currency: CurrencyEnum
     sku: str
@@ -24,6 +25,7 @@ class ProductUpdate(BaseModel):
 class ProductResponse(BaseModel):
     id: int
     name: str
+    description: str | None = None
     price: Decimal
     currency: CurrencyEnum
     sku: str

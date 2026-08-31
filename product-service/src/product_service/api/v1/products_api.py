@@ -77,7 +77,6 @@ async def delete_product(
     try:
         logger.info(f"Deleting product with ID: {product_id}")
         await service.delete_product(product_id)
-        return {"message": "Product deleted successfully"}
     except pe.ProductNotFound as e:
         logger.error(f"Error occurred while deleting product: {e}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")

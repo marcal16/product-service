@@ -19,8 +19,11 @@ GET /api/v1/products/{product_id}
 PUT /api/v1/products/{product_id}
 DELETE /api/v1/products{product_id}
 
-Env. variable:
-    - db_src - database URL
+.env example file structure:
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=123
+POSTGRES_DB=products_service
+DB_SRC=postgresql+asyncpg://postgres:123@localhost/products_service #For local launch
 
 Database strcuture:
     type: CurrencyEnum (USD, EUR, CAD), can be extended

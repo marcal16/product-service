@@ -22,4 +22,4 @@ class ProductsService:
         return await self.products_repository.update_product(product_id, data)
 
     async def delete_product(self, product_id: int):
-        return await self.products_repository.delete_product(product_id)
+        await self.products_repository.delete_product(product_id)

@@ -15,6 +15,7 @@ class Products(Base):
 
     id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    description: Mapped[str] = mapped_column(sa.Text, nullable=True)
     price: Mapped[Decimal] = mapped_column(sa.Numeric(15, 2), nullable=False)
     currency: Mapped[CurrencyEnum] = mapped_column(sa.Enum(CurrencyEnum, native_enum=True, create_type=True, name="currency_enum"), nullable=False)
     sku: Mapped[str] = mapped_column(sa.String(100), nullable=False, unique=True)
