@@ -37,6 +37,7 @@ class ProductsRepo:
             setattr(product, key, value)
         try:
             await self.db.commit()
+            await self.db.refresh(product)
             return product
         except IntegrityError as e:
             await self.db.rollback()
@@ -62,3 +63,21 @@ class ProductsRepo:
         
         result = await self.db.execute(query)
         return result.scalars().all()
+
+    #AC-102
+    async def reserve_product(self, product_id: int, quantity: int):
+        stmt = select(Products).where(Products.id == product_id).with_for_update()
+        product = await self.db.scalar(stmt)
+        if not product or product.is_active is False:
+            await self.db.rollback()
+            raise pe.ProductNotFound("Product not found")
+        if product.quantity < quantity:
+            error = f"Insufficient quantity available for reservation. " \
+            f"Product ID: {product_id}, Requested: {quantity}, Available: {product.quantity}"
+            await self.db.rollback()
+            raise pe.InsufficientQuantity(error)
+        product.reserved += quantity
+        product.quantity -= quantity
+        await self.db.commit()
+        await self.db.refresh(product)
+        return product

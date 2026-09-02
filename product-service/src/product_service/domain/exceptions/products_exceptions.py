@@ -13,3 +13,7 @@ class ProductAlreadyExists(Exception):
 class InvalidProductData(Exception):
     """Raised when the provided product data is invalid."""
     pass 
+
+class InsufficientQuantity(Exception):
+    """Raised when there is insufficient quantity of a product."""
+    pass

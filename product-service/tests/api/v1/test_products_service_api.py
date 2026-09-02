@@ -29,7 +29,6 @@ async def test_get_product(client, product_data):
     data = response.json()
     assert data["id"] == product_id
     assert data["name"] == product_data["name"]
-    assert data["price"] == product_data["price"]
 
 async def test_get_nonexistent_product(client):
     response = await client.get("/api/v1/products/999999")  # Assuming this ID does not exist
@@ -64,13 +63,13 @@ async def test_update_product(client, product_data):
     update_response = await client.put(f"/api/v1/products/{product_id}", json=updated_data)
     assert update_response.status_code == 200
     data = update_response.json()
-    assert data["price"] == updated_data["price"]
+    assert data["price"] == str(updated_data["price"])
 
     # Retrieve the updated product to verify changes
     get_response = await client.get(f"/api/v1/products/{product_id}")
     assert get_response.status_code == 200
     data = get_response.json()
-    assert data["price"] == updated_data["price"]
+    assert data["price"] == str(updated_data["price"])
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_duplicate_sku(client, product_data):

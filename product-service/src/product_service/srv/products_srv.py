@@ -23,3 +23,9 @@ class ProductsService:
 
     async def delete_product(self, product_id: int):
         await self.products_repository.delete_product(product_id)
+
+    #AC-102
+    async def reserve_product(self, product_id: int, quantity: int):
+        if quantity <= 0:
+            raise pe.InvalidProductData("Quantity to reserve must be greater than zero")
+        return await self.products_repository.reserve_product(product_id, quantity)

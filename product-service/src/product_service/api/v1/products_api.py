@@ -41,7 +41,7 @@ async def create_product(
         logger.error(f"Error occurred while creating product: {e}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Product already exists")
 
-@router.get("/{product_id}")
+@router.get("/{product_id}", response_model=ps.ProductResponse)
 async def get_product(
     product_id: int,
     service: ServiceDependency
@@ -53,7 +53,7 @@ async def get_product(
         logger.error(f"Error occurred while fetching product: {e}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
-@router.put("/{product_id}")
+@router.put("/{product_id}", response_model=ps.ProductResponse)
 async def update_product(
     product_id: int,
     payload: ps.ProductUpdate,
@@ -84,3 +84,22 @@ async def delete_product(
         logger.error(f"Error occurred while deleting product: {e}")
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
 
+#AC-102: New endpoint to reserve a product
+@router.post("/{product_id}/reserve", status_code=status.HTTP_200_OK, response_model=ps.ProductReservationResponse)
+async def reserve_product(
+    product_id: int,
+    quantity: int,
+    service: ServiceDependency
+):
+    try:
+        logger.info(f"Reserving {quantity} units of product with ID: {product_id}")
+        return await service.reserve_product(product_id, quantity)
+    except pe.ProductNotFound as e:
+        logger.error(f"Error occurred while reserving product: {e}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    except pe.InsufficientQuantity as e:
+        logger.error(f"Error occurred while reserving product: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient quantity available for reservation")
+    except pe.InvalidProductData as e:
+        logger.error(f"Error occurred while reserving product: {e}")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))

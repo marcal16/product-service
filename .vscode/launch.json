@@ -12,7 +12,7 @@
             "module": "pytest",
             "cwd": "${workspaceFolder}/product-service",
             "args": [
-                "tests/api/v1/test_products_service_api.py::test_invalid_quantity"
+                //"tests/api/v1/test_products_service_api.py::test_get_product"
             ]
         }
     ]

@@ -19,7 +19,11 @@ class Products(Base):
     price: Mapped[Decimal] = mapped_column(sa.Numeric(15, 2), nullable=False)
     currency: Mapped[CurrencyEnum] = mapped_column(sa.Enum(CurrencyEnum, native_enum=True, create_type=True, name="currency_enum"), nullable=False)
     sku: Mapped[str] = mapped_column(sa.String(100), nullable=False, unique=True)
-    quantity: Mapped[Decimal] = mapped_column(sa.Numeric(18, 3), nullable=False)
+    #Changed to integer due to company's policy of not allowing float values for quantity
+    quantity: Mapped[int] = mapped_column(sa.Integer, nullable=False)
+    #AC-102
+    reserved: Mapped[int] = mapped_column(sa.Integer, nullable=False, default=0, server_default="0")
+    #AC-102
     is_active: Mapped[bool] = mapped_column(sa.Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(sa.DateTime, server_default=sa.func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False)

@@ -11,7 +11,7 @@ class ProductCreate(BaseModel):
     price: Decimal
     currency: CurrencyEnum
     sku: str
-    quantity: Decimal
+    quantity: int
 
 #update
 class ProductUpdate(BaseModel):
@@ -19,7 +19,7 @@ class ProductUpdate(BaseModel):
     price: Decimal | None = None
     currency: CurrencyEnum | None = None
     sku: str | None = None
-    quantity: Decimal | None = None
+    quantity: int | None = None
 
 #repone
 class ProductResponse(BaseModel):
@@ -29,10 +29,19 @@ class ProductResponse(BaseModel):
     price: Decimal
     currency: CurrencyEnum
     sku: str
-    quantity: Decimal
+    quantity: int
+    reserved: int
     created_at: datetime
     updated_at: datetime
     is_active: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ProductReservationResponse(BaseModel):
+    sku: str
+    quantity: int
+    reserved: int
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
