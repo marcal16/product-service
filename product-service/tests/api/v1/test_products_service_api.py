@@ -87,8 +87,9 @@ async def test_duplicate_sku(client, product_data):
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_invalid_price(client, product_data):
     # Set an invalid price (negative value)
-    product_data["price"] = -10.00
-    response = await client.post("/api/v1/products", json=product_data)
+    product_data_wrong_price = product_data.copy()
+    product_data_wrong_price["price"] = -10.00
+    response = await client.post("/api/v1/products", json=product_data_wrong_price)
     assert response.status_code == 422  # Unprocessable Entity
     data = response.json()
     assert "check_price_positive" in data["detail"]  # Check that the error is related to the price field
@@ -96,8 +97,9 @@ async def test_invalid_price(client, product_data):
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_invalid_currency(client, product_data):
     # Set an invalid currency code
-    product_data["currency"] = "INVALID"
-    response = await client.post("/api/v1/products", json=product_data)
+    product_data_wrong_currency = product_data.copy()
+    product_data_wrong_currency["currency"] = "INVALID"
+    response = await client.post("/api/v1/products", json=product_data_wrong_currency)
     assert response.status_code == 422  # Unprocessable Entity
     data = response.json()
     assert "currency" in data["detail"][0]["loc"]  # Check that the error is related to the currency field
@@ -105,8 +107,9 @@ async def test_invalid_currency(client, product_data):
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_invalid_quantity(client, product_data):
     # Set an invalid quantity (negative value)
-    product_data["quantity"] = -5
-    response = await client.post("/api/v1/products", json=product_data)
+    product_data_wrong_quantity = product_data.copy()
+    product_data_wrong_quantity["quantity"] = -5
+    response = await client.post("/api/v1/products", json=product_data_wrong_quantity)
     assert response.status_code == 422  # Unprocessable Entity
     data = response.json()
     assert "check_quantity_non_negative" in data["detail"]  # Check that the error is related to the quantity field

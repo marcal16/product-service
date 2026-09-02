@@ -5,12 +5,8 @@ Service allow to add, update, get, mark as deleted products
 To launch:
 docker compose up
 
-For test need to create db in local postgres with name test_products_service or change it URL inside
-tests conftest.py
-Project uses poetry, so first
--- poetry install 
-then:
--- poetry run pytest
+To test:
+docker compose -f docker-compose-dev.yaml up --build
 
 API endpoints:
 POST /api/v1/products
@@ -28,7 +24,7 @@ DB_SRC=postgresql+asyncpg://postgres:123@localhost/products_service #For local l
 Database strcuture:
     type: CurrencyEnum (USD, EUR, CAD), can be extended
     tables:
-        Products (id, name, price, currency, sku, quantity, is_active, created_at, updated_at)
+        Products (id, name, description, price, currency, sku, quantity, is_active, created_at, updated_at)
 
 Project structure:
     api/v1: api endpoints by block, router unites them all

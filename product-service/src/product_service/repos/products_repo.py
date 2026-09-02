@@ -58,6 +58,7 @@ class ProductsRepo:
         if filter.is_active is not None:
             query = query.where(Products.is_active == filter.is_active)
         query = query.offset((filter.page - 1) * filter.limit).limit(filter.limit)
+        query = query.order_by(Products.created_at.desc(), Products.id)
         
         result = await self.db.execute(query)
         return result.scalars().all()

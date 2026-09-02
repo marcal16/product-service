@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from product_service.db.models.products import CurrencyEnum
 from decimal import Decimal
 
@@ -38,8 +38,8 @@ class ProductResponse(BaseModel):
 
 #filter
 class BaseFilter(BaseModel):
-    page: int | None = 1
-    limit: int | None = 10
+    page: int | None = Field(default=1, ge=1)
+    limit: int | None = Field(default=10, ge=1)
 
 class ProductFilter(BaseFilter):
     is_active: bool | None = None

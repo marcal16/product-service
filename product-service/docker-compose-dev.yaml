@@ -1,0 +1,17 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+    command: poetry run pytest -vv -s --tb=long
+    environment:
+      - TEST_DB_SRC=postgresql+asyncpg://postgres:123@db:5432/test_products_service
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: test_products_service

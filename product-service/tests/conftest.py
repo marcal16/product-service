@@ -1,11 +1,11 @@
-import pytest
+import pytest, os
 from product_service.main import app
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from product_service.db.base import Base
 from product_service.dependencies.session import get_session
 from httpx2 import AsyncClient, ASGITransport
 
-DB_URL = "postgresql+asyncpg://postgres:123@localhost/test_products_service"
+DB_URL = os.getenv("TEST_DB_SRC", "postgresql+asyncpg://postgres:123@db:5432/test_products_service")
 
 test_engine =  create_async_engine(DB_URL, echo=True)
 async_session = async_sessionmaker(test_engine, expire_on_commit=False)

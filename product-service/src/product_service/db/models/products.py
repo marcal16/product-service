@@ -26,5 +26,6 @@ class Products(Base):
 
     __table_args__ = (
         sa.CheckConstraint('price > 0', name='check_price_positive'),
-        sa.CheckConstraint('quantity >= 0', name='check_quantity_non_negative')
+        sa.CheckConstraint('quantity >= 0', name='check_quantity_non_negative'),
+        sa.CheckConstraint("TRIM(name) <> ''", name='check_name_not_empty_ck'),
     )
