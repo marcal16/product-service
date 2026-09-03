@@ -16,8 +16,8 @@ async def test_reserv_1_item(client, product_data):
     product_id = create_response.json()["id"]
 
     # Reserve 1 item of the product
-    quantity = 1
-    reserve_response = await client.post(f"/api/v1/products/{product_id}/reserve", params={"quantity": quantity})
+    payload = {"quantity": 1}
+    reserve_response = await client.post(f"/api/v1/products/{product_id}/reserve", json=payload)
     assert reserve_response.status_code == 200
     data = reserve_response.json()
     assert data["reserved"] == 1
@@ -30,7 +30,8 @@ async def test_reserv_all_stock(client, product_data):
     product_id = create_response.json()["id"]
 
     # Reserve all stock of the product
-    reserve_response = await client.post(f"/api/v1/products/{product_id}/reserve", params={"quantity": product_data["quantity"]})
+    payload = {"quantity": product_data["quantity"]}
+    reserve_response = await client.post(f"/api/v1/products/{product_id}/reserve", json=payload)
     assert reserve_response.status_code == 200
     data = reserve_response.json()
     assert data["reserved"] == product_data["quantity"]
@@ -46,21 +47,24 @@ async def test_reserv_inactive_product(client, product_data):
     await client.delete(f"/api/v1/products/{product_id}")
 
     # Try to reserve the inactive product
-    reserve_response = await client.post(f"/api/v1/products/{product_id}/reserve", params={"quantity": 1})
+    payload = {"quantity": 1}
+    reserve_response = await client.post(f"/api/v1/products/{product_id}/reserve", json=payload)
     assert reserve_response.status_code == 404
     data = reserve_response.json()
     assert data["detail"] == "Product not found"
 
 async def test_reserv_non_existing_product(client):
 
-    reserve_response = await client.post(f"/api/v1/products/{3}/reserve", params={"quantity": 1})
+    payload = {"quantity": 1}
+    reserve_response = await client.post(f"/api/v1/products/{3}/reserve", json=payload)
     assert reserve_response.status_code == 404
     data = reserve_response.json()
     assert data["detail"] == "Product not found"
 
 async def test_reserv_invalid_quantity(client):
 
-    reserve_response = await client.post(f"/api/v1/products/{3}/reserve", params={"quantity": -1})
+    payload = {"quantity": -1}
+    reserve_response = await client.post(f"/api/v1/products/{3}/reserve", json=payload)
     assert reserve_response.status_code == 422
     data = reserve_response.json()
     assert data["detail"] == "Quantity to reserve must be greater than zero"
@@ -72,7 +76,8 @@ async def test_reserv_insufficient_quantity(client, product_data):
     product_id = create_response.json()["id"]
     quantity = product_data["quantity"] + 1  # Request more than available
     # Reserve all stock of the product
-    reserve_response = await client.post(f"/api/v1/products/{product_id}/reserve", params={"quantity": quantity})
+    payload = {"quantity": quantity}
+    reserve_response = await client.post(f"/api/v1/products/{product_id}/reserve", json=payload)
 
     assert reserve_response.status_code == 400
     data = reserve_response.json()
@@ -95,7 +100,7 @@ async def test_reserv_concurrent_requests(client, product_data):
 
     # Create a list of tasks for concurrent reservation requests
     tasks = [
-        client.post(f"/api/v1/products/{product_id}/reserve", params={"quantity": reserve_quantity})
+        client.post(f"/api/v1/products/{product_id}/reserve", json={"quantity": reserve_quantity})
         for _ in range(concurrent_requests)
     ]
 

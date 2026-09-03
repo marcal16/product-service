@@ -21,7 +21,11 @@ class ProductUpdate(BaseModel):
     sku: str | None = None
     quantity: int | None = None
 
-#repone
+#reserve
+class ProductReserve(BaseModel):
+    quantity: int
+
+#response
 class ProductResponse(BaseModel):
     id: int
     name: str

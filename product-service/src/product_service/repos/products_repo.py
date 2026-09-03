@@ -65,12 +65,13 @@ class ProductsRepo:
         return result.scalars().all()
 
     #AC-102
-    async def reserve_product(self, product_id: int, quantity: int):
+    async def reserve_product(self, product_id: int, payload: ps.ProductReserve):
         stmt = select(Products).where(Products.id == product_id).with_for_update()
         product = await self.db.scalar(stmt)
         if not product or product.is_active is False:
             await self.db.rollback()
             raise pe.ProductNotFound("Product not found")
+        quantity = payload.quantity
         if product.quantity < quantity:
             error = f"Insufficient quantity available for reservation. " \
             f"Product ID: {product_id}, Requested: {quantity}, Available: {product.quantity}"

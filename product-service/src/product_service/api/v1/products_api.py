@@ -88,12 +88,12 @@ async def delete_product(
 @router.post("/{product_id}/reserve", status_code=status.HTTP_200_OK, response_model=ps.ProductReservationResponse)
 async def reserve_product(
     product_id: int,
-    quantity: int,
+    payload: ps.ProductReserve,
     service: ServiceDependency
 ):
     try:
-        logger.info(f"Reserving {quantity} units of product with ID: {product_id}")
-        return await service.reserve_product(product_id, quantity)
+        logger.info(f"Reserving {payload.quantity} units of product with ID: {product_id}")
+        return await service.reserve_product(product_id, payload)
     except pe.ProductNotFound as e:
         logger.error(f"Error occurred while reserving product: {e}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
