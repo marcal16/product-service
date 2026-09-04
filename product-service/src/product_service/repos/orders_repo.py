@@ -16,7 +16,12 @@ class OrdersRepo:
         for item in order_data.items:
             products[item.product_id] = products.get(item.product_id, 0) + item.quantity
 
-        db_products = await self.db.execute(select(Products).where(Products.id.in_(products.keys()) & Products.is_active == True).with_for_update())
+        db_products = await self.db.execute(
+            select(Products)
+            .where(Products.id.in_(products.keys()) & Products.is_active == True)
+            .order_by(Products.id)
+            .with_for_update()
+        )
         db_products = db_products.scalars().all()
 
         if len(db_products) != len(products):
