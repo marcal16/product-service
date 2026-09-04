@@ -17,3 +17,7 @@ class InvalidProductData(Exception):
 class InsufficientQuantity(Exception):
     """Raised when there is insufficient quantity of a product."""
     pass
+
+class InvalidOrderData(Exception):
+    """Raised when the provided order data is invalid."""
+    pass

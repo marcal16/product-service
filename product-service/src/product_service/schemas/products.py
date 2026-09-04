@@ -1,7 +1,8 @@
+from ast import List
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
-from product_service.db.models.products import CurrencyEnum
+from product_service.db.models.products import CurrencyEnum, OrderStatusEnum
 from decimal import Decimal
 
 #post

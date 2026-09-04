@@ -61,3 +61,34 @@ Project structure:
 
   tests:
     new file was created 'test_products_reservation_api.py', there is also concurrent requests test
+
+
+#AC-103
+Order business process
+
+In order to extend business process logic in the future,
+for the process created new service, repo, schemas, api files
+added new exception
+
+db:
+  - new:
+      - enum type OrderStatusEnum (PENDING, CONFIRMED, CANCELLED)
+      - table orders (id, status, created_at, updated_at)
+      - table orders itesm (id, order_id, product_id, quantity)
+
+API:
+  new route: 
+    - POST /api/v1/orders/
+        accepts list of items (id, quantity), can be repeated, their quantity will be summed and
+        checked for availability as a one total number
+        returns 422 InvalidOrderData if list of items is empty or any item has 0 quantity
+        returns 404 ProductNotFound if non existing items are found in request
+        returns 400 InsufficientQuantity if there are insufficient quantity for any of items
+
+        order uses pessimisitc lock all items from the order at once in order to check their 
+        availability and make reservation. It will be waiting until all of them are available
+        before starts the process. So, deadlock will never happen.
+
+Tests:
+  restructurized to individual folders due to different fixtures are needed
+  orders tested for every descrived error, correct requests, concurrent execution

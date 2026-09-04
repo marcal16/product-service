@@ -1,10 +1,6 @@
 import pytest, os
-import sqlalchemy as sa
-from product_service.main import app
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from product_service.db.base import Base
-from product_service.dependencies.session import get_session
-from httpx2 import AsyncClient, ASGITransport
 
 DB_URL = os.getenv("TEST_DB_SRC", "postgresql+asyncpg://postgres:123@localhost:5432/test_products_service")
 
@@ -14,19 +10,6 @@ async_session = async_sessionmaker(test_engine, expire_on_commit=False)
 async def get_test_session():
     async with async_session() as session:
         yield session
-
-@pytest.fixture(scope='function')
-async def client():
-        
-    app.dependency_overrides[get_session] = get_test_session
-    transport = ASGITransport(app=app)
-    try:
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            yield client
-    finally:
-        app.dependency_overrides.clear()
-        async with test_engine.begin() as conn:
-            await conn.execute(sa.text("DELETE FROM products;"))
 
 @pytest.fixture(scope='session', autouse=True)
 async def setup_database():
