@@ -12177,3 +12177,4 @@ WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible
 [2026-09-04 09:08:07,408] INFO in base: DROP TYPE order_status_enum
 [2026-09-04 09:08:07,408] INFO in base: [no key 0.00020s] ()
 [2026-09-04 09:08:07,409] INFO in base: COMMIT
+[2026-09-07 15:34:19,596] INFO in products_api: Creating new product

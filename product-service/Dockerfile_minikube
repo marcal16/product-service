@@ -9,16 +9,18 @@ RUN groupadd --gid 10001 product-service && \
 
 WORKDIR /product-service
 
-COPY --chown produser:product-service pyproject.toml poetry.lock ./
+COPY --chown=produser:product-service pyproject.toml poetry.lock ./
 
 RUN pip install poetry && \
     poetry config virtualenvs.create false && \
-    poetry install --no-root
+    poetry install --without test --no-root
 
-COPY --chown produser:product-service . .
+COPY --chown=produser:product-service . .
 
-ENV PYTHONPATH=/product-service
+ENV PYTHONPATH=/product-service/src
 
 USER produser
 
-CMD ["poetry", "run", "pytest"]
+EXPOSE 8000
+
+CMD ["uvicorn", "product_service.main:app", "--host", "0.0.0.0", "--port", "8000"]

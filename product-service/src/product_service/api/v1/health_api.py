@@ -1,5 +1,6 @@
-from fastapi import APIRouter, status, Depends
-from product_service.dependencies.session import get_db
+from fastapi import APIRouter, status, Depends, HTTPException
+from product_service.dependencies.session import get_session
+from sqlalchemy import text
 
 router = APIRouter()
 
@@ -7,11 +8,14 @@ router = APIRouter()
 def live():
     return {"status": "alive"}
 
-@router.get("/ready", status_code=status.HTTP_200_OK)
-async def ready(db=Depends(get_db)):
+@router.get("/ready")
+async def ready(db=Depends(get_session)):
     # Perform a simple database query to check if the database is reachable
     try:
-        await db.execute("SELECT 1")
+        await db.execute(text("SELECT 1;"))
         return {"status": "ready"}
     except Exception as e:
-        return {"status": "not ready", "error": str(e)}
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database is unavailable"
+        )
