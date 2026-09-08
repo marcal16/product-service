@@ -26,28 +26,29 @@ jobs:
         ports:
           - 5432:5432
 
-      steps:
-        - name: Check out code
-          uses: actions/checkout@v4
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
 
-        - name: Install poetry
-          run: pipx install poetry
- 
-        - name: Set up Python
-          uses: actions/setup-python@v5
-          with:
-            python-version: '3.14'
-            cache: 'poetry'
-            cache-dependency-path: 'product-service/pyproject.toml'
+      - name: Install poetry
+        run: pipx install poetry
 
-        - name: Configure poetry and install dependencies
-          run: |
-            poetry config virtualenvs.create false
-            poetry install --no-root
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: 'poetry'
+          cache-dependency-path: 'product-service/pyproject.toml'
 
-        - name: Run pytest
-          working-directory: ./product-service
-          env:
-            DB_SRC: postgresql+asyncpg://postgres:123@localhost:5432/test_db
-            TESTING: "True"
-          run: pytest
+      - name: Configure poetry and install dependencies
+        working-directory: ./product-service
+        run: |
+          poetry config virtualenvs.create false
+          poetry install --no-root
+
+      - name: Run pytest
+        working-directory: ./product-service
+        env:
+          DB_SRC: postgresql+asyncpg://postgres:123@localhost:5432/test_db
+          TESTING: "True"
+        run: pytest
