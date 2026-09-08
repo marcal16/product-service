@@ -46,10 +46,6 @@ jobs:
           poetry config virtualenvs.create false
           poetry install --no-root
 
-      - name: Alembic migration
-        working-directory: ./product-service
-        run: poetry run alembic upgrade head
-
       - name: Run pytest
         working-directory: ./product-service
         env:
