@@ -1,4 +1,3 @@
-# ruff: noqa: BLE001
 from fastapi import APIRouter, status, Depends, HTTPException
 from product_service.dependencies.session import get_session
 from sqlalchemy import text

@@ -3,7 +3,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from product_service.db.base import Base
 from decimal import Decimal
-from datetime import date, datetime
+from datetime import datetime
 
 class CurrencyEnum(Enum):
     USD = "USD"
