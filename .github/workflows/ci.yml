@@ -60,4 +60,4 @@ jobs:
 
       - name: Build Docker image
         working-directory: ./product-service
-        run: docker build -t products:v1.0.0
+        run: docker build -t products:v1.0.0 .
