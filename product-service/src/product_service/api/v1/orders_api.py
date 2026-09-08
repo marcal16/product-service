@@ -32,7 +32,9 @@ async def create_order(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
     except pe.ProductNotFound as e:
         logger.error(f"Error occurred while creating order: {e}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order has product that does not exist")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                            detail="Order has product that does not exist")
     except pe.InsufficientQuantity as e:
         logger.error(f"Error occurred while creating order: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient product quantity. Details: " + str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+                            detail="Insufficient product quantity. Details: " + str(e))

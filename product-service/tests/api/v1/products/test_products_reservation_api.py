@@ -21,7 +21,8 @@ async def test_reserv_1_item(client, product_data):
     assert reserve_response.status_code == 200
     data = reserve_response.json()
     assert data["reserved"] == 1
-    assert data["quantity"] == product_data["quantity"] - 1  # Check that the quantity has decreased by 1
+    # Check that the quantity has decreased by 1
+    assert data["quantity"] == product_data["quantity"] - 1  
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_reserv_all_stock(client, product_data):
@@ -115,4 +116,4 @@ async def test_reserv_concurrent_requests(client, product_data):
     record_response = await client.get(f"/api/v1/products/{product_id}")
     record_data = record_response.json()
     assert record_data["reserved"] == successful_reservations * reserve_quantity
-    assert record_data["quantity"] == product_data["quantity"] - (successful_reservations * reserve_quantity)
+    assert record_data["quantity"] == product_data["quantity"]-(successful_reservations * reserve_quantity)

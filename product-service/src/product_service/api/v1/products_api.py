@@ -85,7 +85,8 @@ async def delete_product(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
 
 #AC-102: New endpoint to reserve a product
-@router.post("/{product_id}/reserve", status_code=status.HTTP_200_OK, response_model=ps.ProductReservationResponse)
+@router.post("/{product_id}/reserve", status_code=status.HTTP_200_OK, 
+             response_model=ps.ProductReservationResponse)
 async def reserve_product(
     product_id: int,
     payload: ps.ProductReserve,
@@ -99,7 +100,8 @@ async def reserve_product(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     except pe.InsufficientQuantity as e:
         logger.error(f"Error occurred while reserving product: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient quantity available for reservation")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+                            detail="Insufficient quantity available for reservation")
     except pe.InvalidProductData as e:
         logger.error(f"Error occurred while reserving product: {e}")
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))

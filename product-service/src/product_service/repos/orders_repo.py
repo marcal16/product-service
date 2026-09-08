@@ -48,7 +48,11 @@ class OrdersRepo:
             requested_quantity = products[db_product.id]
             db_product.quantity -= requested_quantity
             db_product.reserved += requested_quantity
-            order_item = OrderItems(order_id=new_order.id, product_id=db_product.id, quantity=requested_quantity)
+            order_item = OrderItems(
+                order_id=new_order.id, 
+                product_id=db_product.id, 
+                quantity=requested_quantity
+            )
             order_items.append(order_item)
         self.db.add_all(order_items)
 

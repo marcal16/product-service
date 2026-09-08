@@ -14,7 +14,8 @@ async def test_create_product(client, product_data):
     assert response.status_code == 201
     data = response.json()
     assert data["name"] == product_data["name"]
-    assert data["price"] == str(product_data["price"]) # Decimal values are often returned as strings in JSON
+    # Decimal values are often returned as strings in JSON
+    assert data["price"] == str(product_data["price"]) 
     assert "id" in data
 
 @pytest.mark.parametrize("product_data", [product_data])
@@ -91,7 +92,8 @@ async def test_invalid_price(client, product_data):
     response = await client.post("/api/v1/products", json=product_data_wrong_price)
     assert response.status_code == 422  # Unprocessable Entity
     data = response.json()
-    assert "check_price_positive" in data["detail"]  # Check that the error is related to the price field
+    # Check that the error is related to the price field
+    assert "check_price_positive" in data["detail"]  
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_invalid_currency(client, product_data):
@@ -101,7 +103,8 @@ async def test_invalid_currency(client, product_data):
     response = await client.post("/api/v1/products", json=product_data_wrong_currency)
     assert response.status_code == 422  # Unprocessable Entity
     data = response.json()
-    assert "currency" in data["detail"][0]["loc"]  # Check that the error is related to the currency field
+    # Check that the error is related to the currency field
+    assert "currency" in data["detail"][0]["loc"]  
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_invalid_quantity(client, product_data):
@@ -111,4 +114,5 @@ async def test_invalid_quantity(client, product_data):
     response = await client.post("/api/v1/products", json=product_data_wrong_quantity)
     assert response.status_code == 422  # Unprocessable Entity
     data = response.json()
-    assert "check_quantity_non_negative" in data["detail"]  # Check that the error is related to the quantity field
+    # Check that the error is related to the quantity field
+    assert "check_quantity_non_negative" in data["detail"]  

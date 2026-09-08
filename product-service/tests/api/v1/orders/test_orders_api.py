@@ -121,7 +121,8 @@ async def test_create_order_with_insufficient_quantity(client):
     assert response.status_code == 400  # Bad Request
     data = response.json()
     assert "Insufficient product quantity" in data['detail']
-    assert "product ID 2" in data['detail']  # Ensure the error message mentions the specific product with insufficient quantity
+    # Ensure the error message mentions the specific product with insufficient quantity
+    assert "product ID 2" in data['detail']  
 
 async def test_concurrent_order_creation(client):
 
@@ -154,5 +155,7 @@ async def test_concurrent_order_creation(client):
     )
 
     successful_responses = [response for response in responses if response.status_code == 201]
-    assert len(successful_responses) == 1  # Only one should succeed due to stock limitations
-    assert any(response.status_code == 400 for response in responses)  # The other should fail due to insufficient quantity
+    # Only one should succeed due to stock limitations
+    assert len(successful_responses) == 1  
+    # The other should fail due to insufficient quantity
+    assert any(response.status_code == 400 for response in responses)  

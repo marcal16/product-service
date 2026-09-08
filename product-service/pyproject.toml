@@ -24,7 +24,7 @@ asyncio_default_test_loop_scope = "session"
 pythonpath = ["src"]
 
 [tool.ruff]
-line-length = 88
+line-length = 110
 exclude = [
     "alembic/versions"
 ]

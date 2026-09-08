@@ -36,4 +36,8 @@ async def client():
     finally:
         app.dependency_overrides.clear()
         async with test_engine.begin() as conn:
-            await conn.execute(sa.text("TRUNCATE TABLE products, orders, order_items RESTART IDENTITY CASCADE;"))
+            await conn.execute(
+                sa.text(
+                    "TRUNCATE TABLE products, orders, order_items RESTART IDENTITY CASCADE;"
+                )
+            )
