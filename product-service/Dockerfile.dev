@@ -14,10 +14,12 @@ COPY --chown produser:product-service pyproject.toml poetry.lock ./
 RUN pip install poetry && \
     poetry config virtualenvs.create false && \
     poetry install --no-root
-
+    
 COPY --chown produser:product-service . .
-
+    
 ENV PYTHONPATH=/product-service
+
+RUN poetry run alembic upgrade head
 
 USER produser
 

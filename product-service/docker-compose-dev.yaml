@@ -5,6 +5,7 @@ services:
       dockerfile: ./Dockerfile.dev
     command: poetry run pytest -vv -s --tb=long
     environment:
+      - TESTING=true
       - TEST_DB_SRC=postgresql+asyncpg://postgres:123@db:5432/test_products_service
     depends_on:
       - db
