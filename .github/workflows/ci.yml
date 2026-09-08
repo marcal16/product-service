@@ -38,6 +38,7 @@ jobs:
           with:
             python-version: '3.14'
             cache: 'poetry'
+            cache-dependency-path: 'product-service/pyproject.toml'
 
         - name: Configure poetry and install dependencies
           run: |
@@ -45,6 +46,7 @@ jobs:
             poetry install --no-root
 
         - name: Run pytest
+          working-directory: ./product-service
           env:
             DB_SRC: postgresql+asyncpg://postgres:123@localhost:5432/test_db
             TESTING: "True"
