@@ -51,4 +51,4 @@ jobs:
         env:
           DB_SRC: postgresql+asyncpg://postgres:123@localhost:5432/test_db
           TESTING: "True"
-        run: pytest
+        run: poetry run pytest
