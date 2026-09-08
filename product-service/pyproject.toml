@@ -35,8 +35,6 @@ select = [
     "F",
     "I",
 ]
-
-[tool.ruff.lint]
 ignore = ["I001"]
 
 [build-system]
