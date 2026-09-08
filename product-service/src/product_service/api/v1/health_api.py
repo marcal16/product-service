@@ -1,3 +1,4 @@
+# ruff: noqa: BLE001
 from fastapi import APIRouter, status, Depends, HTTPException
 from product_service.dependencies.session import get_session
 from sqlalchemy import text
@@ -14,7 +15,7 @@ async def ready(db=Depends(get_session)):
     try:
         await db.execute(text("SELECT 1;"))
         return {"status": "ready"}
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Database is unavailable"

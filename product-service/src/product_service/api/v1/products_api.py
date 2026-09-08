@@ -22,7 +22,7 @@ ServiceDependency = Annotated[ProductsService, Depends(get_service)]
 @router.get("", response_model=list[ps.ProductResponse])
 async def get_products(
     service: ServiceDependency,
-    filter = Depends()
+    filter: ps.ProductFilter = Depends()
 ):
     return await service.get_all_products(filter)
 

@@ -10,6 +10,10 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    env:
+      TEST_DB_SRC: postgresql+asyncpg://postgres:123@localhost:5432/test_db
+      TESTING: "True"
+
     services:
       postgres:
         image: postgres:17
@@ -28,7 +32,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install poetry
         run: pipx install poetry
@@ -52,7 +56,4 @@ jobs:
 
       - name: Run pytest
         working-directory: ./product-service
-        env:
-          TEST_DB_SRC: postgresql+asyncpg://postgres:123@localhost:5432/test_db
-          TESTING: "True"
         run: poetry run pytest
