@@ -6,9 +6,10 @@ import sqlalchemy as sa
 
 from tests.conftest import get_test_session, test_engine
 
-@pytest.fixture(scope='function')
+
+@pytest.fixture(scope="function")
 async def client():
-        
+
     app.dependency_overrides[get_session] = get_test_session
     transport = ASGITransport(app=app)
     try:

@@ -4,7 +4,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from product_service.db.models.products import CurrencyEnum
 from decimal import Decimal
 
-#post
+
+# post
 class ProductCreate(BaseModel):
     name: str
     description: str | None = None
@@ -13,7 +14,8 @@ class ProductCreate(BaseModel):
     sku: str
     quantity: int
 
-#update
+
+# update
 class ProductUpdate(BaseModel):
     name: str | None = None
     price: Decimal | None = None
@@ -21,11 +23,13 @@ class ProductUpdate(BaseModel):
     sku: str | None = None
     quantity: int | None = None
 
-#reserve
+
+# reserve
 class ProductReserve(BaseModel):
     quantity: int
 
-#response
+
+# response
 class ProductResponse(BaseModel):
     id: int
     name: str
@@ -41,6 +45,7 @@ class ProductResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class ProductReservationResponse(BaseModel):
     sku: str
     quantity: int
@@ -49,10 +54,12 @@ class ProductReservationResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-#filter
+
+# filter
 class BaseFilter(BaseModel):
     page: int | None = Field(default=1, ge=1)
     limit: int | None = Field(default=10, ge=1)
+
 
 class ProductFilter(BaseFilter):
     is_active: bool | None = None

@@ -5,8 +5,9 @@ product_data = {
     "price": 19.99,
     "currency": "USD",
     "sku": "TESTSKU123",
-    "quantity": 10
+    "quantity": 10,
 }
+
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_create_product(client, product_data):
@@ -15,8 +16,9 @@ async def test_create_product(client, product_data):
     data = response.json()
     assert data["name"] == product_data["name"]
     # Decimal values are often returned as strings in JSON
-    assert data["price"] == str(product_data["price"]) 
+    assert data["price"] == str(product_data["price"])
     assert "id" in data
+
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_get_product(client, product_data):
@@ -31,11 +33,13 @@ async def test_get_product(client, product_data):
     assert data["id"] == product_id
     assert data["name"] == product_data["name"]
 
+
 async def test_get_nonexistent_product(client):
     response = await client.get("/api/v1/products/999999")  # Assuming this ID does not exist
     assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "Product not found"
+
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_delete_product(client, product_data):
@@ -52,6 +56,7 @@ async def test_delete_product(client, product_data):
     assert get_response.status_code == 404
     data = get_response.json()
     assert data["detail"] == "Product not found"
+
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_update_product(client, product_data):
@@ -72,6 +77,7 @@ async def test_update_product(client, product_data):
     data = get_response.json()
     assert data["price"] == str(updated_data["price"])
 
+
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_duplicate_sku(client, product_data):
     # Create the first product
@@ -84,6 +90,7 @@ async def test_duplicate_sku(client, product_data):
     data = response2.json()
     assert data["detail"] == "Product already exists"
 
+
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_invalid_price(client, product_data):
     # Set an invalid price (negative value)
@@ -93,7 +100,8 @@ async def test_invalid_price(client, product_data):
     assert response.status_code == 422  # Unprocessable Entity
     data = response.json()
     # Check that the error is related to the price field
-    assert "check_price_positive" in data["detail"]  
+    assert "check_price_positive" in data["detail"]
+
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_invalid_currency(client, product_data):
@@ -104,7 +112,8 @@ async def test_invalid_currency(client, product_data):
     assert response.status_code == 422  # Unprocessable Entity
     data = response.json()
     # Check that the error is related to the currency field
-    assert "currency" in data["detail"][0]["loc"]  
+    assert "currency" in data["detail"][0]["loc"]
+
 
 @pytest.mark.parametrize("product_data", [product_data])
 async def test_invalid_quantity(client, product_data):
@@ -115,4 +124,4 @@ async def test_invalid_quantity(client, product_data):
     assert response.status_code == 422  # Unprocessable Entity
     data = response.json()
     # Check that the error is related to the quantity field
-    assert "check_quantity_non_negative" in data["detail"]  
+    assert "check_quantity_non_negative" in data["detail"]

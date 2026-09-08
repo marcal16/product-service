@@ -2,6 +2,7 @@ import product_service.domain.exceptions.products_exceptions as pe
 from product_service.repos.products_repo import ProductsRepo
 import product_service.schemas.products as ps
 
+
 class ProductsService:
     def __init__(self, products_repository: ProductsRepo):
         self.products_repository = products_repository
@@ -24,7 +25,7 @@ class ProductsService:
     async def delete_product(self, product_id: int):
         await self.products_repository.delete_product(product_id)
 
-    #AC-102
+    # AC-102
     async def reserve_product(self, product_id: int, payload: ps.ProductReserve):
         if payload.quantity <= 0:
             raise pe.InvalidProductData("Quantity to reserve must be greater than zero")

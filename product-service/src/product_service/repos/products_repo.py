@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 import product_service.schemas.products as ps
 import product_service.domain.exceptions.products_exceptions as pe
 
+
 class ProductsRepo:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -60,11 +61,11 @@ class ProductsRepo:
             query = query.where(Products.is_active == filter.is_active)
         query = query.offset((filter.page - 1) * filter.limit).limit(filter.limit)
         query = query.order_by(Products.created_at.desc(), Products.id)
-        
+
         result = await self.db.execute(query)
         return result.scalars().all()
 
-    #AC-102
+    # AC-102
     async def reserve_product(self, product_id: int, payload: ps.ProductReserve):
         stmt = select(Products).where(Products.id == product_id).with_for_update()
         product = await self.db.scalar(stmt)
@@ -73,8 +74,10 @@ class ProductsRepo:
             raise pe.ProductNotFound("Product not found")
         quantity = payload.quantity
         if product.quantity < quantity:
-            error = f"Insufficient quantity available for reservation. " \
-            f"Product ID: {product_id}, Requested: {quantity}, Available: {product.quantity}"
+            error = (
+                f"Insufficient quantity available for reservation. "
+                f"Product ID: {product_id}, Requested: {quantity}, Available: {product.quantity}"
+            )
             await self.db.rollback()
             raise pe.InsufficientQuantity(error)
         product.reserved += quantity

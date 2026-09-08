@@ -21,9 +21,10 @@ async def seed(conn):
         )
     )
 
-@pytest.fixture(scope='function')
+
+@pytest.fixture(scope="function")
 async def client():
-        
+
     app.dependency_overrides[get_session] = get_test_session
     transport = ASGITransport(app=app)
 
@@ -37,7 +38,5 @@ async def client():
         app.dependency_overrides.clear()
         async with test_engine.begin() as conn:
             await conn.execute(
-                sa.text(
-                    "TRUNCATE TABLE products, orders, order_items RESTART IDENTITY CASCADE;"
-                )
+                sa.text("TRUNCATE TABLE products, orders, order_items RESTART IDENTITY CASCADE;")
             )

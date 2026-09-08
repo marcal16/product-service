@@ -4,12 +4,12 @@ from product_service.db.models.products import Products, Orders, OrderItems, Ord
 import product_service.schemas.orders as ors
 import product_service.domain.exceptions.products_exceptions as pe
 
-class OrdersRepo:
 
+class OrdersRepo:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    #AC-103
+    # AC-103
     async def create_order(self, order_data: ors.OrderCreate):
 
         products = {}
@@ -49,18 +49,16 @@ class OrdersRepo:
             db_product.quantity -= requested_quantity
             db_product.reserved += requested_quantity
             order_item = OrderItems(
-                order_id=new_order.id, 
-                product_id=db_product.id, 
-                quantity=requested_quantity
+                order_id=new_order.id, product_id=db_product.id, quantity=requested_quantity
             )
             order_items.append(order_item)
         self.db.add_all(order_items)
 
         await self.db.commit()
-        await self.db.refresh(new_order) #Update order created_at and updated_at dates
+        await self.db.refresh(new_order)  # Update order created_at and updated_at dates
         return {
-            'id': new_order.id,
-            'status': new_order.status,
-            'items': [{'product_id': item.product_id, 'quantity': item.quantity} for item in order_items],
-            'created_at': new_order.created_at
+            "id": new_order.id,
+            "status": new_order.status,
+            "items": [{"product_id": item.product_id, "quantity": item.quantity} for item in order_items],
+            "created_at": new_order.created_at,
         }

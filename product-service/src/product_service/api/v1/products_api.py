@@ -11,26 +11,24 @@ router = APIRouter()
 
 logger = logging.getLogger(__name__)
 
-def get_service(session = Depends(get_session)):
+
+def get_service(session=Depends(get_session)):
 
     repo = ProductsRepo(session)
     service = ProductsService(repo)
     return service
 
+
 ServiceDependency = Annotated[ProductsService, Depends(get_service)]
 
+
 @router.get("", response_model=list[ps.ProductResponse])
-async def get_products(
-    service: ServiceDependency,
-    filter: ps.ProductFilter = Depends()
-):
+async def get_products(service: ServiceDependency, filter: ps.ProductFilter = Depends()):
     return await service.get_all_products(filter)
 
+
 @router.post("", response_model=ps.ProductResponse, status_code=status.HTTP_201_CREATED)
-async def create_product(
-    service: ServiceDependency,
-    payload: ps.ProductCreate
-):
+async def create_product(service: ServiceDependency, payload: ps.ProductCreate):
     try:
         logger.info("Creating new product")
         return await service.create_product(payload)
@@ -41,11 +39,9 @@ async def create_product(
         logger.error(f"Error occurred while creating product: {e}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Product already exists")
 
+
 @router.get("/{product_id}", response_model=ps.ProductResponse)
-async def get_product(
-    product_id: int,
-    service: ServiceDependency
-):
+async def get_product(product_id: int, service: ServiceDependency):
     try:
         logger.info(f"Fetching product with ID: {product_id}")
         return await service.get_product_by_id(product_id)
@@ -53,12 +49,9 @@ async def get_product(
         logger.error(f"Error occurred while fetching product: {e}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
+
 @router.put("/{product_id}", response_model=ps.ProductResponse)
-async def update_product(
-    product_id: int,
-    payload: ps.ProductUpdate,
-    service: ServiceDependency
-):
+async def update_product(product_id: int, payload: ps.ProductUpdate, service: ServiceDependency):
     try:
         logger.info(f"Updating product with ID: {product_id}")
         return await service.update_product(product_id, payload)
@@ -69,11 +62,9 @@ async def update_product(
         logger.error(f"Error occurred while updating product: {e}")
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
 
+
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(
-    product_id: int,
-    service: ServiceDependency
-):
+async def delete_product(product_id: int, service: ServiceDependency):
     try:
         logger.info(f"Deleting product with ID: {product_id}")
         await service.delete_product(product_id)
@@ -84,14 +75,12 @@ async def delete_product(
         logger.error(f"Error occurred while deleting product: {e}")
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
 
-#AC-102: New endpoint to reserve a product
-@router.post("/{product_id}/reserve", status_code=status.HTTP_200_OK, 
-             response_model=ps.ProductReservationResponse)
-async def reserve_product(
-    product_id: int,
-    payload: ps.ProductReserve,
-    service: ServiceDependency
-):
+
+# AC-102: New endpoint to reserve a product
+@router.post(
+    "/{product_id}/reserve", status_code=status.HTTP_200_OK, response_model=ps.ProductReservationResponse
+)
+async def reserve_product(product_id: int, payload: ps.ProductReserve, service: ServiceDependency):
     try:
         logger.info(f"Reserving {payload.quantity} units of product with ID: {product_id}")
         return await service.reserve_product(product_id, payload)
@@ -100,8 +89,9 @@ async def reserve_product(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     except pe.InsufficientQuantity as e:
         logger.error(f"Error occurred while reserving product: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                            detail="Insufficient quantity available for reservation")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient quantity available for reservation"
+        )
     except pe.InvalidProductData as e:
         logger.error(f"Error occurred while reserving product: {e}")
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))

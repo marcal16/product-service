@@ -2,12 +2,12 @@ import product_service.schemas.orders as ors
 import product_service.domain.exceptions.products_exceptions as pe
 from product_service.repos.orders_repo import OrdersRepo
 
-class OrdersService():
 
+class OrdersService:
     def __init__(self, products_repository: OrdersRepo):
         self.products_repository = products_repository
 
-    #AC-103
+    # AC-103
     async def create_order(self, order_data: ors.OrderCreate):
         if not order_data.items:
             raise pe.InvalidOrderData("Order must contain at least one item")
