@@ -1,4 +1,3 @@
-import pytest, os
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from product_service.core.settings import settings
 #from product_service.db.base import Base

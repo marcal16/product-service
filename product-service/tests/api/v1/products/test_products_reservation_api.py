@@ -1,4 +1,5 @@
-import pytest, asyncio
+import pytest
+import asyncio
 
 product_data = {
     "name": "Test Product",

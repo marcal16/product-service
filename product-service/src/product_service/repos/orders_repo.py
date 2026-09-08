@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, true
 from sqlalchemy.ext.asyncio import AsyncSession
 from product_service.db.models.products import Products, Orders, OrderItems, OrderStatusEnum
 import product_service.schemas.orders as ors
@@ -18,7 +18,7 @@ class OrdersRepo:
 
         db_products = await self.db.execute(
             select(Products)
-            .where(Products.id.in_(products.keys()) & Products.is_active == True)
+            .where(Products.id.in_(products.keys()) & Products.is_active.is_(true()))
             .order_by(Products.id)
             .with_for_update()
         )
