@@ -50,5 +50,6 @@ jobs:
         working-directory: ./product-service
         env:
           TEST_DB_SRC: postgresql+asyncpg://postgres:123@localhost:5432/test_db
+          DB_SRC: postgresql+asyncpg://postgres:123@localhost:5432/test_db
           TESTING: "True"
         run: poetry run pytest
