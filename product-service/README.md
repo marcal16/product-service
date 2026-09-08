@@ -100,3 +100,12 @@ added health check to docker compose files
 added kubernetess manifests for secrest,services,statefulSet for db and deploy for api
 
 The API runs with two replicas. PostgreSQL runs as a StatefulSet. The API uses readiness and liveness probes. When PostgreSQL becomes unavailable, API Pods remain running but become unready; after PostgreSQL recovery they become ready again.
+
+#AC-105 CI pipeline
+
+Every push to main and pull-request run:
+- poetry and its dependencies installation
+- alembic migration
+- pytest
+- docker build
+- ruff code quality and formatting checks
