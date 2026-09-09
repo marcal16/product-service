@@ -14,3 +14,6 @@ class OrdersService:
         if any(item.quantity <= 0 for item in order_data.items):
             raise pe.InvalidOrderData("All order items must have a quantity greater than zero")
         return await self.products_repository.create_order(order_data)
+
+    async def cancel_order(self, order_id: int):
+        return await self.products_repository.cancel_order(order_id)

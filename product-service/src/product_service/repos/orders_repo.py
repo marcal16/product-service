@@ -1,5 +1,6 @@
 from sqlalchemy import select, true
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from product_service.db.models.products import Products, Orders, OrderItems, OrderStatusEnum
 import product_service.schemas.orders as ors
 import product_service.domain.exceptions.products_exceptions as pe
@@ -62,3 +63,47 @@ class OrdersRepo:
             "items": [{"product_id": item.product_id, "quantity": item.quantity} for item in order_items],
             "created_at": new_order.created_at,
         }
+
+    async def cancel_order(self, order_id: int):
+
+        try:
+            order_res = await self.db.execute(
+                select(Orders).where(Orders.id == order_id).with_for_update(nowait=True)
+            )
+            order = order_res.scalar()
+            if not order:
+                await self.db.rollback()
+                raise pe.OrderNotFound("Order not found")
+
+            if order.status != OrderStatusEnum.PENDING:
+                order_status = order.status
+                await self.db.rollback()
+                raise pe.InvalidOrderStatus(
+                    f"Order status is {order_status}. \
+                                            Only orders with status PENDING can be cancelled"
+                )
+
+            products_stmt = (
+                select(Products, OrderItems)
+                .join(OrderItems, OrderItems.product_id == Products.id)
+                .where(OrderItems.order_id == order_id)
+                .order_by(Products.id)
+                .with_for_update(of=[Products])
+            )
+            products = await self.db.execute(products_stmt)
+
+            for prod, item_line in products:
+                prod.reserved -= item_line.quantity
+                prod.quantity += item_line.quantity
+
+            order.status = OrderStatusEnum.CANCELLED
+            await self.db.commit()
+            await self.db.refresh(order)
+            return order
+
+        except DBAPIError:
+            await self.db.rollback()
+            raise pe.OrderLockError("The order is locked by another process")
+        except IntegrityError:
+            await self.db.rollback()
+            raise pe.InvalidProductData("Programming error, quantity cannot be lower than zero")

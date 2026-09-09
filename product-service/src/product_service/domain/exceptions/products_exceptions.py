@@ -32,3 +32,25 @@ class InvalidOrderData(Exception):
     """Raised when the provided order data is invalid."""
 
     pass
+
+
+class OrderNotFound(Exception):
+    """Raised when the provided order is not found"""
+
+    pass
+
+
+class InvalidOrderStatus(Exception):
+    """
+    Raised when order has unproccessable status
+    for current request
+    """
+
+    pass
+
+
+class OrderLockError(Exception):
+    """
+    Raises then request is trying to make changes with order
+    which is catched by another process
+    """

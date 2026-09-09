@@ -30,3 +30,9 @@ class OrderResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class OrderCancelResponse(BaseModel):
+    id: int
+    status: OrderStatusEnum
+    updated_at: datetime

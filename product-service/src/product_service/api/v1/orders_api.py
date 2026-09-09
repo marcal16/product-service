@@ -41,3 +41,25 @@ async def create_order(service: ServiceDependency, payload: ors.OrderCreate):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Insufficient product quantity. Details: " + str(e),
         )
+
+
+@router.post("/{order_id}/cancel", response_model=ors.OrderCancelResponse)
+async def cancel_order(service: ServiceDependency, order_id: int):
+    try:
+        logger.info(f"Cancelling {order_id} order")
+        return await service.cancel_order(order_id)
+    except pe.OrderNotFound as e:
+        logger.error(f"Error occured while cancelling order: {e}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order does not exists")
+    except pe.InvalidOrderStatus as e:
+        logger.error(f"Error occured while cancelling order: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Order has unproccessable status. Details:" + str(e),
+        )
+    except pe.OrderLockError as e:
+        logger.error(f"Error occured while cancelling order: {e}")
+        raise HTTPException(status_code=status.HTTP_423_LOCKED, detail=str(e))
+    except pe.InvalidProductData as e:
+        logger.error(f"Error occured while cancelling order: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

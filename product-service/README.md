@@ -9,22 +9,35 @@ To test:
 docker compose -f docker-compose-dev.yaml up --build
 
 API endpoints:
+product:
 POST /api/v1/products
 GET /api/v1/products
 GET /api/v1/products/{product_id}
 PUT /api/v1/products/{product_id}
 DELETE /api/v1/products{product_id}
+POST /api/v1/products/{product_id}/reserve
+orders:
+POST /api/v1/orders
+POST /api/v1/orders/{order_id}/cancel
+healtcheck:
+GET /api/v1/health/live
+GET /api/v1/health/ready
 
 .env example file structure:
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=123
 POSTGRES_DB=products_service
-DB_SRC=postgresql+asyncpg://postgres:123@localhost/products_service #For local launch
+DB_SRC=postgresql+asyncpg://postgres:123@localhost/products_service #Main db
+TESTING=True
+TEST_DB_SRC=postgresql+asyncpg://postgres:123@localhost/test_db #test db, works with testing=true
 
 Database strcuture:
     type: CurrencyEnum (USD, EUR, CAD), can be extended
     tables:
-        Products (id, name, description, price, currency, sku, quantity, is_active, created_at, updated_at)
+        Products (id, name, description, price, currency, sku, quantity, reserved, 
+        is_active, created_at, updated_at)
+        Orders (id, status, created_at, updated_at)
+        Order_items (id, order_id, product_id, quantity)
 
 Project structure:
     api/v1: api endpoints by block, router unites them all
@@ -37,71 +50,17 @@ Project structure:
     repos: repositories, all db operations
     schemas: pydantic schemas
     srv: service layer
-
-  #AC-102
-  db models:
-    - added column 'reserverd' to products table, type int
-
-  schemas:
-    - ProductReserve - used for reservation, includes: quantity
-    - ProdeuctReservationResponse - response, include: quantity, reserved, updated_at, sku
-
-  endpoint:
-    - new endpoint for reservation:
-        POST /api/v1/products/{product_id}/reserve
-    
-  domain exceptions:
-    - InsufficientQuantity - attempt to reserve more than stocked
-
-  process:
-    at service layer quantity checked for being positive, so at db level to checks
-    at repo level userd pessimistic lock, record has got with 'with_for_update' construction
-      so it is locked for one request at time, others wait in stock
-      being locked it cheked for stock and after that changes are made
-
-  tests:
-    new file was created 'test_products_reservation_api.py', there is also concurrent requests test
-
-
-#AC-103
-Order business process
-
-In order to extend business process logic in the future,
-for the process created new service, repo, schemas, api files
-added new exception
-
-db:
-  - new:
-      - enum type OrderStatusEnum (PENDING, CONFIRMED, CANCELLED)
-      - table orders (id, status, created_at, updated_at)
-      - table orders itesm (id, order_id, product_id, quantity)
-
-API:
-  new route: 
-    - POST /api/v1/orders/
-        accepts list of items (id, quantity), can be repeated, their quantity will be summed and
-        checked for availability as a one total number
-        returns 422 InvalidOrderData if list of items is empty or any item has 0 quantity
-        returns 404 ProductNotFound if non existing items are found in request
-        returns 400 InsufficientQuantity if there are insufficient quantity for any of items
-
-        order uses pessimisitc lock all items from the order at once in order to check their 
-        availability and make reservation. It will be waiting until all of them are available
-        before starts the process. So, deadlock will never happen.
-
-Tests:
-  restructurized to individual folders due to different fixtures are needed
-  orders tested for every descrived error, correct requests, concurrent execution
-
+    k8s: kubernetes manifests
 
 #Kubernetess
-added 2 endpoint for containers probes and healthchecks
-added health check to docker compose files
-added kubernetess manifests for secrest,services,statefulSet for db and deploy for api
-
 The API runs with two replicas. PostgreSQL runs as a StatefulSet. The API uses readiness and liveness probes. When PostgreSQL becomes unavailable, API Pods remain running but become unready; after PostgreSQL recovery they become ready again.
 
-#AC-105 CI pipeline
+#Docker
+docker-compose.yaml, Dockerfile - prod app launch on docker
+docker-compose-dev.yaml, Dockerfile.dev - test launch
+Dockerfile_minikube - build for migration to k8s, excluded alembic migration
+
+CI pipeline
 
 Every push to main and pull-request run:
 - poetry and its dependencies installation
@@ -109,3 +68,21 @@ Every push to main and pull-request run:
 - pytest
 - docker build
 - ruff code quality and formatting checks
+
+#Processes
+
+Products:
+  CRUD actions (create, get, update, delete) 
+  Basic reserve - checks quantity and moves the amount to reserve
+Health:
+  made for containers healthchecks
+Orders:
+  create - order documents for reservation, its lock products before
+           quantity checks. Products sorted by id before lock in order
+           to avoid deadlocks. Order statuses: PENGING, CANCELLED, CONFIRMED
+  cancel - cancel order. All reserved amounts move back to quantity. Order locks
+           first, if failed the operation is cancelled. If status is not pendings
+           it returns error. Confirmed orders must be reversed by another document
+           Items locked next ordered by id. There are no reservation and quantity checks,
+           because there must be enough. The amount in order items are moved from reserve
+           to quantity.
