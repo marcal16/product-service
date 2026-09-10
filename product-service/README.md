@@ -19,6 +19,7 @@ POST /api/v1/products/{product_id}/reserve
 orders:
 POST /api/v1/orders
 POST /api/v1/orders/{order_id}/cancel
+POST /api/v1/orders/{order_id}/confirm
 healtcheck:
 GET /api/v1/health/live
 GET /api/v1/health/ready
@@ -86,3 +87,6 @@ Orders:
            Items locked next ordered by id. There are no reservation and quantity checks,
            because there must be enough. The amount in order items are moved from reserve
            to quantity.
+  confirm - confirm order. All checks are the same like in cancel process. Amount from
+            products' reserve are written off. The reserved amount must in product must be enough
+            to be written off.

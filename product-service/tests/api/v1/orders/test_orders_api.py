@@ -214,3 +214,161 @@ async def test_concurrent_attempt_to_cancel_order(client):
     assert len(successful_responses) == 1
     # The other should fail due to insufficient quantity
     assert any(response.status_code == 423 for response in responses)
+
+
+async def test_nonexisting_order_confirmation(client):
+
+    # Order does not exist
+    response = await client.post(f"/api/v1/orders/{1}/confirm")
+    assert response.status_code == 404
+    data = response.json()
+    assert "Order does not exists" in data["detail"]
+
+
+async def test_confirm_order_single_item(client):
+
+    # New order
+    order_data = {"items": [{"product_id": 1, "quantity": 20}]}
+
+    prod_id = order_data["items"][0]["product_id"]
+    product_response_before = await client.get(f"/api/v1/products/{prod_id}")
+    product_quantity = product_response_before.json()["quantity"]
+
+    # Order is created
+    create_response = await client.post("/api/v1/orders", json=order_data)
+    assert create_response.status_code == 201
+
+    order_data = create_response.json()
+    order_id = order_data["id"]
+
+    # Confirm it
+    response = await client.post(f"/api/v1/orders/{order_id}/confirm")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "CONFIRMED"
+
+    # Product's is emptied is returned back to quantity
+    product_response = await client.get(f"/api/v1/products/{prod_id}")
+    product_data = product_response.json()
+    assert product_data["reserved"] == 0
+    assert product_data["quantity"] != product_quantity
+
+
+async def test_confirm_order_multiple_items(client):
+
+    # New order
+    order_data = {"items": [{"product_id": 1, "quantity": 10}, {"product_id": 1, "quantity": 5}]}
+
+    # Order is created
+    create_response = await client.post("/api/v1/orders", json=order_data)
+    assert create_response.status_code == 201
+
+    order_data = create_response.json()
+    order_id = order_data["id"]
+
+    # Confirm it
+    response = await client.post(f"/api/v1/orders/{order_id}/confirm")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "CONFIRMED"
+
+    # Each product's reserve is emptied
+    for prod in order_data["items"]:
+        prod_id = prod["product_id"]
+        product_respons = await client.get(f"/api/v1/products/{prod_id}")
+        product_data = product_respons.json()
+        assert product_data["reserved"] == 0
+
+
+async def test_confirm_incorrect_status_order(client):
+
+    # New order
+    order_data = {"items": [{"product_id": 1, "quantity": 20}]}
+
+    # Order is created
+    create_response = await client.post("/api/v1/orders", json=order_data)
+    assert create_response.status_code == 201
+
+    order_data = create_response.json()
+    order_id = order_data["id"]
+
+    # Cancell it
+    response = await client.post(f"/api/v1/orders/{order_id}/confirm")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "CONFIRMED"
+
+    # Cancell again
+    response = await client.post(f"/api/v1/orders/{order_id}/confirm")
+    assert response.status_code == 422
+    data = response.json()
+    assert "Only orders with status PENDING can be confirmed" in data["detail"]
+
+
+async def test_concurrent_attempt_to_confirm_two_orders(client):
+
+    # New orders
+    order_data_1 = {"items": [{"product_id": 1, "quantity": 40}, {"product_id": 2, "quantity": 30}]}
+    response_1 = await client.post("/api/v1/orders", json=order_data_1)
+    order_id_1 = response_1.json()["id"]
+
+    order_data_2 = {"items": [{"product_id": 3, "quantity": 10}, {"product_id": 2, "quantity": 15}]}
+    response_2 = await client.post("/api/v1/orders", json=order_data_2)
+    order_id_2 = response_2.json()["id"]
+
+    # Simulate concurrent requests
+    responses = await asyncio.gather(
+        client.post(f"/api/v1/orders/{order_id_1}/confirm"),
+        client.post(f"/api/v1/orders/{order_id_2}/confirm"),
+    )
+
+    successful_responses = [response for response in responses if response.status_code == 200]
+    # Both should succeed
+    assert len(successful_responses) == 2
+
+
+async def test_concurrent_attempt_to_confirm_one_order(client):
+
+    # New order
+    order_data = {"items": [{"product_id": 1, "quantity": 40}, {"product_id": 2, "quantity": 30}]}
+    response = await client.post("/api/v1/orders", json=order_data)
+    order_id = response.json()["id"]
+
+    # Simulate concurrent requests
+    responses = await asyncio.gather(
+        client.post(f"/api/v1/orders/{order_id}/confirm"), client.post(f"/api/v1/orders/{order_id}/confirm")
+    )
+
+    successful_responses = [response for response in responses if response.status_code == 200]
+    # Both should succeed
+    assert len(successful_responses) == 1
+    # The other should fail due to insufficient quantity
+    assert any(response.status_code == 423 for response in responses)
+
+
+async def test_concurrent_attempt_to_confirm_and_cancell(client):
+
+    # New orders
+    order_data_1 = {"items": [{"product_id": 1, "quantity": 40}]}
+    response_1 = await client.post("/api/v1/orders", json=order_data_1)
+    order_id_1 = response_1.json()["id"]
+
+    order_data_2 = {"items": [{"product_id": 1, "quantity": 15}]}
+    response_2 = await client.post("/api/v1/orders", json=order_data_2)
+    order_id_2 = response_2.json()["id"]
+
+    # Simulate concurrent requests
+    responses = await asyncio.gather(
+        client.post(f"/api/v1/orders/{order_id_1}/confirm"),
+        client.post(f"/api/v1/orders/{order_id_2}/cancel"),
+    )
+
+    successful_responses = [response for response in responses if response.status_code == 200]
+    # Both should succeed
+    assert len(successful_responses) == 2
+
+    # Check product, reserve should be zero
+    prod_id = order_data_1["items"][0]["product_id"]
+    product_respons = await client.get(f"/api/v1/products/{prod_id}")
+    product_data = product_respons.json()
+    assert product_data["reserved"] == 0

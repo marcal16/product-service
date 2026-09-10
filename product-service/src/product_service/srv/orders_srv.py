@@ -17,3 +17,6 @@ class OrdersService:
 
     async def cancel_order(self, order_id: int):
         return await self.products_repository.cancel_order(order_id)
+
+    async def confirm_order(self, order_id: int):
+        return await self.products_repository.confirm_order(order_id)

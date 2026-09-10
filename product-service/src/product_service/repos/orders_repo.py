@@ -107,3 +107,50 @@ class OrdersRepo:
         except IntegrityError:
             await self.db.rollback()
             raise pe.InvalidProductData("Programming error, quantity cannot be lower than zero")
+
+    async def confirm_order(self, order_id: int):
+
+        try:
+            order_res = await self.db.execute(
+                select(Orders).where(Orders.id == order_id).with_for_update(nowait=True)
+            )
+            order = order_res.scalar()
+            if not order:
+                await self.db.rollback()
+                raise pe.OrderNotFound("Order not found")
+
+            if order.status != OrderStatusEnum.PENDING:
+                order_status = order.status
+                await self.db.rollback()
+                raise pe.InvalidOrderStatus(
+                    f"Order status is {order_status}. \
+                    Only orders with status PENDING can be confirmed"
+                )
+
+            products_stmt = (
+                select(Products, OrderItems)
+                .join(OrderItems, OrderItems.product_id == Products.id)
+                .where(OrderItems.order_id == order_id)
+                .order_by(Products.id)
+                .with_for_update(of=[Products])
+            )
+            products = await self.db.execute(products_stmt)
+
+            for prod, item_line in products:
+                if prod.reserved < item_line.quantity:
+                    error_mes = f"Product with ID {prod.id} has not enough reserved amount"
+                    await self.db.rollback()
+                    raise pe.InvalidProductData(error_mes)
+                prod.reserved -= item_line.quantity
+
+            order.status = OrderStatusEnum.CONFIRMED
+            await self.db.commit()
+            await self.db.refresh(order)
+            return order
+
+        except DBAPIError:
+            await self.db.rollback()
+            raise pe.OrderLockError("The order is locked by another process")
+        except IntegrityError:
+            await self.db.rollback()
+            raise pe.InvalidProductData("Programming error, quantity cannot be lower than zero")

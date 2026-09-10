@@ -36,3 +36,9 @@ class OrderCancelResponse(BaseModel):
     id: int
     status: OrderStatusEnum
     updated_at: datetime
+
+
+class OrderConfirmResponse(BaseModel):
+    id: int
+    status: OrderStatusEnum
+    updated_at: datetime
