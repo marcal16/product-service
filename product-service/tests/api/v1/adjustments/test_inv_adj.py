@@ -262,6 +262,7 @@ async def test_two_adj_conc_post(client):
     # Only one should succeed
     assert len(successful_responses) == 1
 
+
 async def test_two_adj_conc_post_and_cancel(client):
 
     adj_data = {"reason": "123", "items": [{"product_id": 1, "quantity_delta": 10}]}
