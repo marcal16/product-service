@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
-from product_service.db.models.products import CurrencyEnum
+from product_service.db.models.products import CurrencyEnum, DocumentStatusEnum
 from decimal import Decimal
 
 
@@ -13,6 +13,16 @@ class ProductCreate(BaseModel):
     currency: CurrencyEnum
     sku: str
     quantity: int
+
+
+class AdjustmentItemCreate(BaseModel):
+    product_id: int
+    quantity_delta: int
+
+
+class AdjustmentCreate(BaseModel):
+    reason: str
+    items: list[AdjustmentItemCreate]
 
 
 # update
@@ -51,6 +61,24 @@ class ProductReservationResponse(BaseModel):
     quantity: int
     reserved: int
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AdjustmentItemResponse(BaseModel):
+    product_id: int
+    quantity_delta: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AdjustmentResponse(BaseModel):
+    id: int
+    status: DocumentStatusEnum
+    reason: str
+    created_at: datetime
+    updated_at: datetime
+    items: list[AdjustmentItemResponse]
 
     model_config = ConfigDict(from_attributes=True)
 

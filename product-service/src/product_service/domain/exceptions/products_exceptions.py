@@ -28,19 +28,19 @@ class InsufficientQuantity(Exception):
     pass
 
 
-class InvalidOrderData(Exception):
+class InvalidDocumentData(Exception):
     """Raised when the provided order data is invalid."""
 
     pass
 
 
-class OrderNotFound(Exception):
-    """Raised when the provided order is not found"""
+class DocumentNotFound(Exception):
+    """Raised when the provided document is not found"""
 
     pass
 
 
-class InvalidOrderStatus(Exception):
+class InvalidDocumentStatus(Exception):
     """
     Raised when order has unproccessable status
     for current request
@@ -49,8 +49,10 @@ class InvalidOrderStatus(Exception):
     pass
 
 
-class OrderLockError(Exception):
+class DataLockError(Exception):
     """
     Raises then request is trying to make changes with order
     which is catched by another process
     """
+
+    pass

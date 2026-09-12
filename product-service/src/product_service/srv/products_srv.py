@@ -25,8 +25,27 @@ class ProductsService:
     async def delete_product(self, product_id: int):
         await self.products_repository.delete_product(product_id)
 
-    # AC-102
     async def reserve_product(self, product_id: int, payload: ps.ProductReserve):
         if payload.quantity <= 0:
             raise pe.InvalidProductData("Quantity to reserve must be greater than zero")
         return await self.products_repository.reserve_product(product_id, payload)
+
+    async def create_adjustment(self, payload: ps.AdjustmentCreate):
+        if not payload.items:
+            raise pe.InvalidProductData("No items provided")
+        errors = []
+        for item in payload.items:
+            if item.quantity_delta == 0:
+                errors.append(f"Product ID {item.product_id} has zero quantity")
+        if errors:
+            raise pe.InvalidProductData("\n".join(errors))
+        return await self.products_repository.create_adjustment(payload)
+
+    async def get_adjustment(self, adjustment_id: int):
+        return await self.products_repository.get_adjustment(adjustment_id)
+
+    async def post_adjustment(self, adjustment_id: int):
+        return await self.products_repository.post_adjustment(adjustment_id)
+
+    async def cancel_adjustment(self, adjustment_id: int):
+        return await self.products_repository.cancel_adjustment(adjustment_id)

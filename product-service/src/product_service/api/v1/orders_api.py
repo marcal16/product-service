@@ -27,7 +27,7 @@ async def create_order(service: ServiceDependency, payload: ors.OrderCreate):
     try:
         logger.info("Creating new order")
         return await service.create_order(payload)
-    except pe.InvalidOrderData as e:
+    except pe.InvalidDocumentData as e:
         logger.error(f"Error occurred while creating order: {e}")
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
     except pe.ProductNotFound as e:
@@ -48,16 +48,16 @@ async def cancel_order(service: ServiceDependency, order_id: int):
     try:
         logger.info(f"Cancelling {order_id} order")
         return await service.cancel_order(order_id)
-    except pe.OrderNotFound as e:
+    except pe.DocumentNotFound as e:
         logger.error(f"Error occured while cancelling order: {e}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order does not exists")
-    except pe.InvalidOrderStatus as e:
+    except pe.InvalidDocumentStatus as e:
         logger.error(f"Error occured while cancelling order: {e}")
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Order has unproccessable status. Details:" + str(e),
         )
-    except pe.OrderLockError as e:
+    except pe.DataLockError as e:
         logger.error(f"Error occured while cancelling order: {e}")
         raise HTTPException(status_code=status.HTTP_423_LOCKED, detail=str(e))
     except pe.InvalidProductData as e:
@@ -70,16 +70,16 @@ async def confirm_order(order_id: int, service: ServiceDependency):
     try:
         logger.info(f"Confirming {order_id} order")
         return await service.confirm_order(order_id)
-    except pe.OrderNotFound as e:
+    except pe.DocumentNotFound as e:
         logger.error(f"Error occured while confirming order: {e}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order does not exists")
-    except pe.InvalidOrderStatus as e:
+    except pe.InvalidDocumentStatus as e:
         logger.error(f"Error occured while confirming order: {e}")
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Order has unproccessable status. Details:" + str(e),
         )
-    except pe.OrderLockError as e:
+    except pe.DataLockError as e:
         logger.error(f"Error occured while confirming order: {e}")
         raise HTTPException(status_code=status.HTTP_423_LOCKED, detail=str(e))
     except pe.InvalidProductData as e:

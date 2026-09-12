@@ -16,6 +16,10 @@ GET /api/v1/products/{product_id}
 PUT /api/v1/products/{product_id}
 DELETE /api/v1/products{product_id}
 POST /api/v1/products/{product_id}/reserve
+POST /api/v1/products/inventory-adjustments/
+POST /api/v1/products/inventory-adjustments/{adjustment_id}/post
+POST /api/v1/products/inventory-adjustments/{adjustment_id}/cancel
+GET /api/v1/products/inventory-adjustments/{adjustment_id}
 orders:
 POST /api/v1/orders
 POST /api/v1/orders/{order_id}/cancel
@@ -39,6 +43,8 @@ Database strcuture:
         is_active, created_at, updated_at)
         Orders (id, status, created_at, updated_at)
         Order_items (id, order_id, product_id, quantity)
+        InventoryAdjustments (id, reason, status, updated_at, created_at)
+        InventoryAdjustmentsItems (id, adjustment_id, product_id, quantity_delta)
 
 Project structure:
     api/v1: api endpoints by block, router unites them all
@@ -90,3 +96,8 @@ Orders:
   confirm - confirm order. All checks are the same like in cancel process. Amount from
             products' reserve are written off. The reserved amount must in product must be enough
             to be written off.
+Inventory adjustments: #correct products quantity
+  create - just a draft, which do nothing itself, status PENFING
+  post - making changes with products, if quantity is available and status
+         is PENDING. Being posted cannot be changed
+  cancel - change status to CANCELLED. Cannot be changed after that. Make no changes. Must be PENDING

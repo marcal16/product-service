@@ -73,12 +73,12 @@ class OrdersRepo:
             order = order_res.scalar()
             if not order:
                 await self.db.rollback()
-                raise pe.OrderNotFound("Order not found")
+                raise pe.DocumentNotFound("Order not found")
 
             if order.status != OrderStatusEnum.PENDING:
                 order_status = order.status
                 await self.db.rollback()
-                raise pe.InvalidOrderStatus(
+                raise pe.InvalidDocumentStatus(
                     f"Order status is {order_status}. \
                                             Only orders with status PENDING can be cancelled"
                 )
@@ -103,7 +103,7 @@ class OrdersRepo:
 
         except DBAPIError:
             await self.db.rollback()
-            raise pe.OrderLockError("The order is locked by another process")
+            raise pe.DataLockError("The order is locked by another process")
         except IntegrityError:
             await self.db.rollback()
             raise pe.InvalidProductData("Programming error, quantity cannot be lower than zero")
@@ -117,12 +117,12 @@ class OrdersRepo:
             order = order_res.scalar()
             if not order:
                 await self.db.rollback()
-                raise pe.OrderNotFound("Order not found")
+                raise pe.DocumentNotFound("Order not found")
 
             if order.status != OrderStatusEnum.PENDING:
                 order_status = order.status
                 await self.db.rollback()
-                raise pe.InvalidOrderStatus(
+                raise pe.InvalidDocumentStatus(
                     f"Order status is {order_status}. \
                     Only orders with status PENDING can be confirmed"
                 )
@@ -150,7 +150,7 @@ class OrdersRepo:
 
         except DBAPIError:
             await self.db.rollback()
-            raise pe.OrderLockError("The order is locked by another process")
+            raise pe.DataLockError("The order is locked by another process")
         except IntegrityError:
             await self.db.rollback()
             raise pe.InvalidProductData("Programming error, quantity cannot be lower than zero")

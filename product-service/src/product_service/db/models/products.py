@@ -41,10 +41,15 @@ class Products(Base):
     )
 
 
-# AC-103
 class OrderStatusEnum(Enum):
     PENDING = "PENDING"
     CONFIRMED = "CONFIRMED"
+    CANCELLED = "CANCELLED"
+
+
+class DocumentStatusEnum(Enum):
+    PENDING = "PENDING"
+    POSTED = "POSTED"
     CANCELLED = "CANCELLED"
 
 
@@ -74,3 +79,37 @@ class OrderItems(Base):
     order: Mapped["Orders"] = relationship("Orders", back_populates="items")
 
     __table_args__ = (sa.CheckConstraint("quantity > 0", name="check_order_item_quantity_positive"),)
+
+
+class InventoryAdjustments(Base):
+    __tablename__ = "inventory_adjustments"
+
+    id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)
+    status: Mapped[DocumentStatusEnum] = mapped_column(
+        sa.Enum(DocumentStatusEnum, native_enum=True, create_type=True, name="document_status_enum"),
+        nullable=False,
+    )
+    reason: Mapped[str] = mapped_column(sa.Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(sa.DateTime, server_default=sa.func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.DateTime, server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False
+    )
+
+    items: Mapped[list["InventoryAdjustmentsItems"]] = relationship(
+        "InventoryAdjustmentsItems", back_populates="adjustment"
+    )
+
+
+class InventoryAdjustmentsItems(Base):
+    __tablename__ = "inventory_adjustments_items"
+
+    id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)
+    adjustment_id: Mapped[int] = mapped_column(
+        sa.Integer, sa.ForeignKey("inventory_adjustments.id"), nullable=False
+    )
+    product_id: Mapped[int] = mapped_column(sa.Integer, sa.ForeignKey("products.id"), nullable=False)
+    quantity_delta: Mapped[int] = mapped_column(sa.Integer, nullable=False)
+
+    adjustment: Mapped["InventoryAdjustments"] = relationship("InventoryAdjustments", back_populates="items")
+
+    __table_args__ = (sa.CheckConstraint("quantity_delta != 0", "non_negative_quantity_ck"),)
