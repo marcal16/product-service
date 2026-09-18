@@ -2,6 +2,7 @@ from sqlalchemy import select, true
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from product_service.db.models.products import Products, Orders, OrderItems, OrderStatusEnum
+from .events_repo import add_event
 import product_service.schemas.orders as ors
 import product_service.domain.exceptions.products_exceptions as pe
 
@@ -136,14 +137,19 @@ class OrdersRepo:
             )
             products = await self.db.execute(products_stmt)
 
+            total = 0
             for prod, item_line in products:
                 if prod.reserved < item_line.quantity:
                     error_mes = f"Product with ID {prod.id} has not enough reserved amount"
                     await self.db.rollback()
                     raise pe.InvalidProductData(error_mes)
                 prod.reserved -= item_line.quantity
+                total += 1
 
             order.status = OrderStatusEnum.CONFIRMED
+            add_event(
+                self.db, {"event_type": "Order confirmed", "payload": {"id": order_id, "items_number": total}}
+            )
             await self.db.commit()
             await self.db.refresh(order)
             return order

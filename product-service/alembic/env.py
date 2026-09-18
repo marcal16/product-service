@@ -10,6 +10,7 @@ from alembic import context
 
 from product_service.db.base import Base
 import product_service.db.models.products
+import product_service.db.models.events
 from product_service.core.settings import settings
 
 # this is the Alembic Config object, which provides

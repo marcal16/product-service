@@ -45,6 +45,8 @@ Database strcuture:
         Order_items (id, order_id, product_id, quantity)
         InventoryAdjustments (id, reason, status, updated_at, created_at)
         InventoryAdjustmentsItems (id, adjustment_id, product_id, quantity_delta)
+        #Probably, temporal solution
+        Outbox_events(id, event_type, status, payload, attempts, created_at, processed_at, last_error)
 
 Project structure:
     api/v1: api endpoints by block, router unites them all
@@ -58,6 +60,7 @@ Project structure:
     schemas: pydantic schemas
     srv: service layer
     k8s: kubernetes manifests
+    workers: temp background processes for pending events
 
 #Kubernetess
 The API runs with two replicas. PostgreSQL runs as a StatefulSet. The API uses readiness and liveness probes. When PostgreSQL becomes unavailable, API Pods remain running but become unready; after PostgreSQL recovery they become ready again.
@@ -101,3 +104,9 @@ Inventory adjustments: #correct products quantity
   post - making changes with products, if quantity is available and status
          is PENDING. Being posted cannot be changed
   cancel - change status to CANCELLED. Cannot be changed after that. Make no changes. Must be PENDING
+Outbox Events:
+  Table for events, which had to be processed by background workers.
+  There are workers folder where they started, own service and repo files.
+  They get first unlocked PENDING or FAILED record and try to execute it. Every start increment attempts
+  counter. There are records for last error date and last processed date. If something goes wrong worker
+  mark as FAILED event, which is processing long enough, so it will be processed again by another worker.
