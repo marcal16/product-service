@@ -98,7 +98,7 @@ Orders:
            to quantity.
   confirm - confirm order. All checks are the same like in cancel process. Amount from
             products' reserve are written off. The reserved amount must in product must be enough
-            to be written off.
+            to be written off. Confirmation create event record to be processed by subsequent workers
 Inventory adjustments: #correct products quantity
   create - just a draft, which do nothing itself, status PENFING
   post - making changes with products, if quantity is available and status
