@@ -34,15 +34,21 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v5
 
-      - name: Install poetry
-        run: pipx install poetry
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.14'
           cache: 'poetry'
           cache-dependency-path: 'product-service/pyproject.toml'
+      
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Check versions
+        run: |
+          python --version
+          poetry --version
+          poetry run python --version
 
       - name: Configure poetry and install dependencies
         working-directory: ./product-service
