@@ -40,7 +40,7 @@ jobs:
           python-version: '3.14'
       
       - name: Install poetry
-        run: pipx install poetry
+        run: pipx install poetry --python "$(which python)"
 
       - name: Set up Poetry cache
         uses: actions/setup-python@v7
