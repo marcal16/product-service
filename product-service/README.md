@@ -27,6 +27,10 @@ POST /api/v1/orders/{order_id}/confirm
 healtcheck:
 GET /api/v1/health/live
 GET /api/v1/health/ready
+reports:
+GET /api/v1/reports/inventory
+GET /api/v1/reports/orders
+GET /api/v1/reports/products/top-ordered
 
 .env example file structure:
 POSTGRES_USER=postgres
@@ -110,3 +114,50 @@ Outbox Events:
   They get first unlocked PENDING or FAILED record and try to execute it. Every start increment attempts
   counter. There are records for last error date and last processed date. If something goes wrong worker
   mark as FAILED event, which is processing long enough, so it will be processed again by another worker.
+
+
+Current reports quary plans:
+Top-ordered products
+QUERY PLAN                                                                  
+---------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=64.75..64.78 rows=10 width=29) (actual time=0.387..0.397 rows=3 loops=1)
+   Sort Key: (sum(order_items.quantity)) DESC, order_items.product_id
+   Sort Method: quicksort  Memory: 25kB
+   ->  Hash Join  (cost=44.22..64.59 rows=10 width=29) (actual time=0.228..0.243 rows=3 loops=1)
+         Hash Cond: (products.id = order_items.product_id)
+         ->  Seq Scan on products  (cost=0.00..18.20 rows=820 width=21) (actual time=0.039..0.042 rows=3 loops=1)
+         ->  Hash  (cost=44.10..44.10 rows=10 width=12) (actual time=0.129..0.133 rows=3 loops=1)
+               Buckets: 1024  Batches: 1  Memory Usage: 9kB
+               ->  Limit  (cost=44.07..44.10 rows=10 width=12) (actual time=0.110..0.115 rows=3 loops=1)
+                     ->  Sort  (cost=44.07..44.57 rows=200 width=12) (actual time=0.107..0.110 rows=3 loops=1)
+                           Sort Key: (sum(order_items.quantity)) DESC, order_items.product_id
+                           Sort Method: quicksort  Memory: 25kB
+                           ->  HashAggregate  (cost=37.75..39.75 rows=200 width=12) (actual time=0.052..0.058 rows=3 loops=1)
+                                 Group Key: order_items.product_id
+                                 Batches: 1  Memory Usage: 40kB
+                                 ->  Seq Scan on order_items  (cost=0.00..28.50 rows=1850 width=8) (actual time=0.013..0.018 rows=5 loops=1)
+Planning Time: 1.612 ms
+Execution Time: 0.702 ms
+
+Orders
+QUERY PLAN                                                
+----------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=56.82..56.83 rows=1 width=32) (actual time=0.066..0.069 rows=1 loops=1)
+   ->  Seq Scan on orders  (cost=0.00..29.62 rows=1554 width=4) (actual time=0.057..0.057 rows=0 loops=1)
+         Filter: (created_at <= '2026-09-23 00:40:21.845526'::timestamp without time zone)
+         Rows Removed by Filter: 3
+ Planning Time: 0.695 ms
+ Execution Time: 0.206 ms
+
+Inventory
+QUERY PLAN                                                   
+---------------------------------------------------------------------------------------------------------------
+ Limit  (cost=2.14..2.16 rows=7 width=33) (actual time=0.152..0.155 rows=1 loops=1)
+   ->  Sort  (cost=2.14..2.16 rows=7 width=33) (actual time=0.149..0.151 rows=1 loops=1)
+         Sort Key: id
+         Sort Method: quicksort  Memory: 25kB
+         ->  Seq Scan on products  (cost=0.00..2.04 rows=7 width=33) (actual time=0.034..0.036 rows=1 loops=1)
+               Filter: (quantity < 10)
+               Rows Removed by Filter: 2
+ Planning Time: 1.292 ms
+ Execution Time: 0.270 ms
