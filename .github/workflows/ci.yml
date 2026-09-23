@@ -50,6 +50,7 @@ jobs:
           cache-dependency-path: 'product-service/pyproject.toml'
 
       - name: Check versions
+        working-directory: ./product-service
         run: |
           python --version
           poetry --version
