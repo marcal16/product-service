@@ -15,11 +15,11 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Check code quality (Lint)
-        uses: astral-sh/ruff-action@v4
+        uses: astral-sh/ruff-action@v3
         with:
           args: "check --output-format=github"
 
       - name: Check code formatting
-        uses: astral-sh/ruff-action@v4
+        uses: astral-sh/ruff-action@v3
         with:
           args: "format --check"
